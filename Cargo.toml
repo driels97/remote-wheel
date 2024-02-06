@@ -2,7 +2,6 @@
 members = [
 	"remote-wheel-sender",
 	"remote-wheel-viewer",
-	"remote-joystick-throttle-sender",
 ]
 
 [profile.dev]

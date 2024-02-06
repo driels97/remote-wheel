@@ -92,6 +92,14 @@ pub struct ButtonOutputConfig {
     pub vmc: VmcButtonOutputConfig,
 }
 
+#[derive(Clone, Debug, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields, rename_all = "kebab-case")]
+pub enum AxisType {
+    X,
+    Y,
+    Z,
+}
+
 impl AppConfig {
     pub async fn read_from(path: impl AsRef<Path>) -> AnyResult<AppConfig> {
         Self::read_from_path(path.as_ref()).await

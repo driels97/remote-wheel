@@ -18,13 +18,11 @@ pub struct Joystick {
     pos: Vec3A,
     rot: Quat,
     radius: f32,
-
     angle_x: f32,
     angle_y: f32,
     angle_z: f32,
     base_rot: Quat,
     tracker: Option<DefaultAtom>,
-
     technique: Technique,
 }
 

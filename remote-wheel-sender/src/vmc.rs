@@ -24,7 +24,7 @@ use avatar::AvatarState;
 use bone::Bone;
 pub use config::{AxisOutputConfig, ButtonOutputConfig, Config};
 
-use crate::config::MappingConfig;
+use crate::config::{AxisInputConfig, AxisType, MappingConfig};
 use crate::output::OutputEvent;
 
 use self::avatar::Pose;
@@ -138,6 +138,16 @@ pub async fn run(
             msg = recv.recv().fuse() => match msg {
                 Ok(OutputEvent::UpdateAxis(id, value)) => {
                     if let Some(axis) = mappings.axis.get(&id) {
+                        let mut axis_type = AxisType::Z;
+
+                        for enum_axis_config in axis.input.iter() {
+                            axis_type = match enum_axis_config {
+                                AxisInputConfig::Controller(input_config) => input_config.axis_type.clone(),
+                                _ => AxisType::Z,
+                            };
+                        }
+
+
                         for (name, range) in axis.output.vmc.on_update.blendshape.iter() {
                             let mapped_value = range[0] + value as f32 * (range[1] - range[0]);
                             tracking.update_blendshape(name, mapped_value / 100.0);
@@ -146,7 +156,19 @@ pub async fn run(
                         for (name, range) in axis.output.vmc.on_update.device.iter() {
                             if let Some(device) = devices.get_mut(name) {
                                 let mapped_value = range[0] + value as f32 * (range[1] - range[0]);
-                                device.set_value(mapped_value);
+
+                                let mut value_x = None;
+                                let mut value_y = None;
+                                let mut value_z = None;
+
+
+                                match axis_type {
+                                    AxisType::X => value_x = Some(mapped_value),
+                                    AxisType::Y => value_y = Some(mapped_value),
+                                    AxisType::Z => value_z = Some(mapped_value),
+                                }
+
+                                device.set_value(value_x, value_y, value_z)
                             }
                         }
                     }
@@ -162,7 +184,7 @@ pub async fn run(
                         for (name, range) in button.output.vmc.on_update.device.iter() {
                             if let Some(device) = devices.get_mut(name) {
                                 let mapped_value = if pressed { range[1] } else { range[0] };
-                                device.set_value(mapped_value);
+                                device.set_value(None, None, Some(mapped_value));
                             }
                         }
 
@@ -174,7 +196,7 @@ pub async fn run(
 
                         for (name, value) in on_state.device.iter() {
                             if let Some(device) = devices.get_mut(name) {
-                                device.set_value(*value);
+                                device.set_value(None, None, Some(*value));
                             }
                         }
                     }

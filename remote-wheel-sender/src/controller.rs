@@ -10,14 +10,15 @@ use serde::Deserialize;
 use smol::channel::Receiver as ChannelRx;
 use string_cache::DefaultAtom;
 
-use crate::config::MappingConfig;
+use crate::config::{AxisType, MappingConfig};
 use crate::output::OutputEvent;
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields, rename_all = "kebab-case")]
 pub struct AxisInputConfig {
-    name: DefaultAtom,
-    axis: Axis,
+    pub(super) name: DefaultAtom,
+    pub(super) axis: Axis,
+    pub(super) axis_type: AxisType,
 }
 
 #[derive(Debug, Deserialize)]

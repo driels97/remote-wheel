@@ -19,7 +19,9 @@ pub struct Wheel {
     rot: Quat,
     radius: f32,
 
-    angle: f32,
+    angle_x: f32,
+    angle_y: f32,
+    angle_z: f32,
     base_rot: Quat,
     tracker: Option<DefaultAtom>,
 
@@ -54,7 +56,9 @@ impl TryFrom<WheelConfig> for Wheel {
             radius: config.radius,
             rot,
 
-            angle: 0.0,
+            angle_x: 0.0,
+            angle_y: 0.0,
+            angle_z: 0.0,
             base_rot: rot,
             tracker: config.tracker,
 
@@ -87,10 +91,26 @@ impl Wheel {
         self.technique.pose_inverse(pose, self, f)
     }
 
-    pub fn set_value(&mut self, value: f32) {
-        self.angle = value;
-        self.rot = self.base_rot * Quat::from_rotation_z(-value.to_radians());
-        self.technique.set_rotation(value);
+    pub fn set_value(&mut self, value_x: Option<f32>, value_y: Option<f32>, value_z: Option<f32>) {
+        match value_x {
+            Some(new_value) => self.angle_x = new_value,
+            None => ()
+        };
+
+        match value_y {
+            Some(new_value) => self.angle_y = new_value,
+            None => ()
+        };
+
+        match value_z {
+            Some(new_value) => {
+                self.angle_z = new_value;
+                self.technique.set_rotation(new_value);
+            },
+            None => ()
+        };
+
+        self.rot = self.base_rot * Quat::from_rotation_x(-self.angle_x.to_radians()) * Quat::from_rotation_y(-self.angle_y.to_radians()) * Quat::from_rotation_z(-self.angle_z.to_radians());
     }
 
     pub fn trackers(&self, mut f: impl FnMut(DefaultAtom, Vec3A, Quat)) {
