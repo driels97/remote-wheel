@@ -14,11 +14,15 @@ pub use wheel::{Wheel, WheelConfig};
 mod joystick;
 pub use joystick::{Joystick, JoystickConfig};
 
+mod throttle;
+pub use throttle::{Throttle, ThrottleConfig};
+
 #[derive(Debug, Deserialize)]
 #[serde(try_from = "DeviceConfig")]
 pub enum Device {
     Wheel(Wheel),
     Joystick(Joystick),
+    Throttle(Throttle),
 }
 
 #[derive(Debug, Deserialize)]
@@ -26,6 +30,7 @@ pub enum Device {
 enum DeviceConfig {
     Wheel(WheelConfig),
     Joystick(JoystickConfig),
+    Throttle(ThrottleConfig),
 }
 
 #[allow(unused)]
@@ -40,6 +45,7 @@ impl Device {
         match *self {
             Device::Wheel(ref w) => w.pose_forward(f),
             Device::Joystick(ref w) => w.pose_forward(f),
+            Device::Throttle(ref w) => w.pose_forward(f),
         }
     }
 
@@ -47,6 +53,7 @@ impl Device {
         match *self {
             Device::Wheel(ref w) => w.pose_inverse(pose, f),
             Device::Joystick(ref w) => w.pose_inverse(pose, f),
+            Device::Throttle(ref w) => w.pose_inverse(pose, f),
         }
     }
 
@@ -54,6 +61,7 @@ impl Device {
         match *self {
             Device::Wheel(ref mut w) => w.set_value(value_x, value_y, value_z),
             Device::Joystick(ref mut w) => w.set_value(value_x, value_y, value_z),
+            Device::Throttle(ref mut w) => w.set_value(value_x, value_y, value_z),
         }
     }
 
@@ -61,6 +69,7 @@ impl Device {
         match *self {
             Device::Wheel(ref w) => w.trackers(f),
             Device::Joystick(ref w) => w.trackers(f),
+            Device::Throttle(ref w) => w.trackers(f),
         }
     }
 
@@ -68,6 +77,7 @@ impl Device {
         match *self {
             Device::Wheel(ref mut w) => w.update(dt, pose),
             Device::Joystick(ref mut w) => w.update(dt, pose),
+            Device::Throttle(ref mut w) => w.update(dt, pose),
         }
     }
 }
@@ -79,6 +89,7 @@ impl TryFrom<DeviceConfig> for Device {
         match config {
             DeviceConfig::Wheel(w) => Ok(Device::Wheel(w.try_into()?)),
             DeviceConfig::Joystick(w) => Ok(Device::Joystick(w.try_into()?)),
+            DeviceConfig::Throttle(w) => Ok(Device::Throttle(w.try_into()?)),
         }
     }
 }
